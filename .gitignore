@@ -1,0 +1,6 @@
+.*
+media/
+static/
+docker-compose.yml
+tmp/
+venv/
