@@ -1,11 +1,11 @@
-from users.tests.utils import get_expected_user
-from users.tests.factories import UserFactory
-from django.urls import reverse
-from django.contrib.auth import get_user_model
 import pytest
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from users.tests.factories import UserFactory
+from users.tests.utils import get_expected_user
 
 User = get_user_model()
 
@@ -49,6 +49,7 @@ class TestUserViewSet:
     def test_create_the_same_user_twice(self):
         data = {"username": "string", "password": "string", "email": "user@example.com"}
         UserFactory(**data)
+
         assert User.objects.count() == 1
 
         response = self.client.post(self.endpoint, data=data)
@@ -62,7 +63,7 @@ class TestUserViewSet:
         endpoint = reverse("users:user-me")
         user = UserFactory()
         self.client.force_authenticate(user=user)
-
         response = self.client.get(endpoint)
+
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == get_expected_user(user)
