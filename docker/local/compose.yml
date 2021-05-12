@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/local/django/Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - ./app:/app
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: /entrypoint
+    restart: always
+
+  db:
+    build:
+      context: .
+      dockerfile: ./docker/local/postgres/Dockerfile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./.envs/.local/.postgres
+    ports:
+      - 5432:5432
+
+volumes:
+  postgres_data: {}

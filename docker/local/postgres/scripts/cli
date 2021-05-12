@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+echo "Running psql to connect to the '${POSTGRES_DB}' database."
+
+psql -U ${POSTGRES_USER} ${POSTGRES_DB}
+
+echo "Connection to the '${POSTGRES_DB}' database has been finished."
