@@ -13,6 +13,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("users/", include("users.urls")),
+    path("budgets/", include("budgets.urls")),
     # API Documentation
     path("docs/", schema_view.with_ui("swagger", cache_timeout=0), name="docs"),
 ]

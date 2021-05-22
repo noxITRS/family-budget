@@ -1,0 +1,92 @@
+[
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "food",
+        "fields": {
+            "created": "2021-05-22T11:11:25.639Z",
+            "modified": "2021-05-22T11:11:25.639Z",
+            "title": "Food",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "housing",
+        "fields": {
+            "created": "2021-05-22T11:11:37.255Z",
+            "modified": "2021-05-22T11:11:37.255Z",
+            "title": "Housing",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "income",
+        "fields": {
+            "created": "2021-05-22T11:11:44.849Z",
+            "modified": "2021-05-22T11:11:44.849Z",
+            "title": "Income",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "insurance",
+        "fields": {
+            "created": "2021-05-22T11:11:51.979Z",
+            "modified": "2021-05-22T11:11:51.979Z",
+            "title": "Insurance",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "medical-healthcare",
+        "fields": {
+            "created": "2021-05-22T11:12:03.619Z",
+            "modified": "2021-05-22T11:12:03.619Z",
+            "title": "Medical & Healthcare",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "other",
+        "fields": {
+            "created": "2021-05-22T11:12:08.662Z",
+            "modified": "2021-05-22T11:12:08.662Z",
+            "title": "Other",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "personal-spending",
+        "fields": {
+            "created": "2021-05-22T11:12:18.588Z",
+            "modified": "2021-05-22T11:12:18.588Z",
+            "title": "Personal Spending",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "transportation",
+        "fields": {
+            "created": "2021-05-22T11:12:23.546Z",
+            "modified": "2021-05-22T11:12:23.546Z",
+            "title": "Transportation",
+            "active": true
+        }
+    },
+    {
+        "model": "budgets.budgetcategory",
+        "pk": "utilities",
+        "fields": {
+            "created": "2021-05-22T11:12:30.829Z",
+            "modified": "2021-05-22T11:12:30.829Z",
+            "title": "Utilities",
+            "active": true
+        }
+    }
+]
