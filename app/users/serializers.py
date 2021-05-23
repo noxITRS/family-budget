@@ -5,7 +5,7 @@ from rest_framework import serializers
 User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
@@ -27,3 +27,18 @@ class UserSerializer(serializers.ModelSerializer):
         """
 
         return make_password(value)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "email",
+        )
+        read_only_fields = (
+            "id",
+            "username",
+            "email",
+        )

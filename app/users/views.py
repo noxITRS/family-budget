@@ -2,13 +2,14 @@ from django.contrib.auth import get_user_model
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from users.serializers import UserCreateSerializer, UserSerializer
+from utils.viewsets import SerializerPerActionMixin
 
-from users.serializers import UserSerializer
 
 User = get_user_model()
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(SerializerPerActionMixin, viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
@@ -16,9 +17,10 @@ class UserViewSet(viewsets.ModelViewSet):
     model = User
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    serializer_classes = {"create": UserCreateSerializer}
 
     def get_permissions(self):
-        if self.action in ["create", "password_reminder"]:
+        if self.action in ["create"]:
             return [permissions.AllowAny()]
         elif self.action in ["list", "destroy"]:
             return [permissions.IsAdminUser()]
