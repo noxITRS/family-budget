@@ -2,9 +2,9 @@ from django.contrib.auth import get_user_model
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
 from users.serializers import UserCreateSerializer, UserSerializer
 from utils.viewsets import SerializerPerActionMixin
-
 
 User = get_user_model()
 

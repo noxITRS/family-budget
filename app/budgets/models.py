@@ -10,6 +10,7 @@ User = get_user_model()
 
 
 class Budget(UUIDModel, TimeStampedModel):
+    title = models.CharField(max_length=128)
     owner = models.OneToOneField(User, on_delete=models.CASCADE)
     shared_to = models.ManyToManyField(User, related_name="read_only_budgets", blank=True)
 
@@ -42,7 +43,7 @@ class BudgetOperation(UUIDModel, TimeStampedModel):
     ammount = MoneyField(max_digits=14, decimal_places=2, default_currency="USD")
 
     def clean(self):
-        if self.type == self.INCOME and self.category.title != "Income":
+        if self.type == self.INCOME and self.category and self.category.title != "Income":
             raise ValidationError(f'{self.type} cannot have different category then "Income".')
 
     def save(self, **kwargs):
