@@ -31,7 +31,7 @@ class BudgetSerializer(serializers.ModelSerializer):
 
 
 class BudgetShareSerializer(serializers.Serializer):
-    user_id = PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
+    users = PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
 
 
 class BudgetOperationSerializer(serializers.ModelSerializer):

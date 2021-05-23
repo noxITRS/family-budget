@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, status, viewsets
@@ -16,6 +17,8 @@ from budgets.serializers import (
 )
 from users.serializers import UserSerializer
 from utils.viewsets import SerializerPerActionMixin
+
+User = get_user_model()
 
 
 class BudgetViewSet(
@@ -51,15 +54,21 @@ class BudgetViewSet(
         serializer = self.get_serializer(BudgetOperation.objects.filter(budget=budget))
         return Response(serializer.data)
 
-    @swagger_auto_schema(method="get", responses={status.HTTP_200_OK: UserSerializer(many=True)})
+    @swagger_auto_schema(method="get", request_body=None, responses={status.HTTP_200_OK: UserSerializer(many=True)})
     @swagger_auto_schema(
         method="post", request_body=BudgetShareSerializer, responses={status.HTTP_200_OK: UserSerializer(many=True)}
     )
     @action(detail=True, methods=["get", "post"])
-    def shared(self, request):
+    def shared(self, request, **kwargs):
         budget = self.get_object()
-        serializer = self.get_serializer_class(budget.shared_to.all(), many=True)
-        return Response(serializer.data)
+        if request.method == "POST":
+            self._add_users(request, budget)
+        return Response(self.get_serializer_class()(budget.shared_to.all(), many=True).data)
+
+    def _add_users(self, request, budget):
+        serializer = BudgetShareSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        budget.shared_to.add(*serializer.validated_data["users"])
 
 
 class BudgetCategoryView(ListAPIView):

@@ -7,6 +7,7 @@ from budgets.models import Budget, BudgetCategory
 from budgets.tests.factories import BudgetCategoryFactory, BudgetFactory
 from budgets.tests.utils import get_expected_budget, get_expected_budget_category
 from users.tests.factories import UserFactory
+from users.tests.utils import get_expected_user
 
 
 @pytest.mark.django_db
@@ -171,3 +172,47 @@ class TestBudgetViewSet:
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert Budget.objects.filter(pk=budget.id).exists()
+
+    def test_get_shared(self):
+        user = self._authenticate_user()
+        users = UserFactory.create_batch(2)
+        budget = BudgetFactory(owner=user)
+        budget.shared_to.set(users)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+        response = self.client.get(endpoint)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == [get_expected_user(user) for user in users]
+
+    def test_post_shared_not_existing_user(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=user)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+
+        response = self.client.post(endpoint, data={"users": ["not existing id"]})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_post_shared_one_user(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=user)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+
+        response = self.client.post(endpoint, data={"users": [other_user.id]})
+        assert response.status_code == status.HTTP_200_OK
+        assert budget.shared_to.count() == 1
+
+    def test_post_shared_two_users(self):
+        user = self._authenticate_user()
+        users = [user.id for user in UserFactory.create_batch(2)]
+        budget = BudgetFactory(owner=user)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+
+        response = self.client.post(endpoint, data={"users": users})
+        assert response.status_code == status.HTTP_200_OK
+        assert budget.shared_to.count() == 2
