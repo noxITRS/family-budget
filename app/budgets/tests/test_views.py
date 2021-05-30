@@ -143,6 +143,72 @@ class TestBudgetViewSet:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == get_expected_budget(budget, owner=user.id)
 
+    def test_put_own_budget_name(self):
+        user = self._authenticate_user()
+        budget = BudgetFactory(owner=user)
+        endpoint = reverse("budgets:budgets-detail", kwargs={"pk": budget.id})
+        title = "Changed title."
+        response = self.client.put(endpoint, data={"title": title})
+        budget.refresh_from_db()
+
+        assert budget.title == title
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == get_expected_budget(budget, owner=user.id)
+
+    def test_put_other_users_budget_name_not_shared(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=other_user)
+        endpoint = reverse("budgets:budgets-detail", kwargs={"pk": budget.id})
+        title = "Changed title."
+        response = self.client.put(endpoint, data={"title": title})
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_put_other_users_budget_name_shared(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=other_user)
+        budget.shared_to.set([user])
+        endpoint = reverse("budgets:budgets-detail", kwargs={"pk": budget.id})
+        title = "Changed title."
+        response = self.client.put(endpoint, data={"title": title})
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_patch_own_budget_name(self):
+        user = self._authenticate_user()
+        budget = BudgetFactory(owner=user)
+        endpoint = reverse("budgets:budgets-detail", kwargs={"pk": budget.id})
+        title = "Changed title."
+        response = self.client.patch(endpoint, data={"title": title})
+        budget.refresh_from_db()
+
+        assert budget.title == title
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == get_expected_budget(budget, owner=user.id)
+
+    def test_patch_other_users_budget_name_not_shared(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=other_user)
+        endpoint = reverse("budgets:budgets-detail", kwargs={"pk": budget.id})
+        title = "Changed title."
+        response = self.client.patch(endpoint, data={"title": title})
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_patch_other_users_budget_name_shared(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=other_user)
+        budget.shared_to.set([user])
+        endpoint = reverse("budgets:budgets-detail", kwargs={"pk": budget.id})
+        title = "Changed title."
+        response = self.client.patch(endpoint, data={"title": title})
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     def test_delete_not_authenticated(self):
         some_budget = BudgetFactory()
         endpoint = reverse("budgets:budgets-detail", kwargs={"pk": some_budget.id})
@@ -185,6 +251,25 @@ class TestBudgetViewSet:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == [get_expected_user(user) for user in users]
 
+    def test_post_shared_other_users_budget(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=other_user)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+
+        response = self.client.post(endpoint, data={"users": [other_user.id]})
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_post_shared_yourself(self):
+        user = self._authenticate_user()
+        budget = BudgetFactory(owner=user)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+
+        response = self.client.post(endpoint, data={"users": [user.id]})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
     def test_post_shared_not_existing_user(self):
         user = self._authenticate_user()
         other_user = UserFactory()
@@ -201,8 +286,8 @@ class TestBudgetViewSet:
         budget = BudgetFactory(owner=user)
 
         endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
-
         response = self.client.post(endpoint, data={"users": [other_user.id]})
+
         assert response.status_code == status.HTTP_200_OK
         assert budget.shared_to.count() == 1
 
@@ -212,7 +297,71 @@ class TestBudgetViewSet:
         budget = BudgetFactory(owner=user)
 
         endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
-
         response = self.client.post(endpoint, data={"users": users})
+
         assert response.status_code == status.HTTP_200_OK
         assert budget.shared_to.count() == 2
+
+    def test_delete_shared_other_users_budget(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=other_user)
+
+        user_to_delete = UserFactory()
+        budget.shared_to.set([user_to_delete])
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+        response = self.client.delete(endpoint, data={"users": [user_to_delete.id]})
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_delete_shared_yourself(self):
+        user = self._authenticate_user()
+        budget = BudgetFactory(owner=user)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+        response = self.client.delete(endpoint, data={"users": [user.id]})
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_delete_shared_not_existing_user(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=user)
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+        response = self.client.delete(endpoint, data={"users": ["not existing id"]})
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_delete_shared_one_user(self):
+        user = self._authenticate_user()
+        other_user = UserFactory()
+        budget = BudgetFactory(owner=user)
+
+        user_to_delete = UserFactory()
+        budget.shared_to.set([user_to_delete])
+
+        assert budget.shared_to.count() == 1
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+        response = self.client.delete(endpoint, data={"users": [user_to_delete.id]})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert budget.shared_to.count() == 0
+
+    def test_delete_shared_two_users(self):
+        user = self._authenticate_user()
+        users = [user.id for user in UserFactory.create_batch(2)]
+        budget = BudgetFactory(owner=user)
+
+        users_to_delete = UserFactory.create_batch(2)
+        budget.shared_to.set(users_to_delete)
+
+        assert budget.shared_to.count() == 2
+
+        endpoint = reverse("budgets:budgets-shared", kwargs={"pk": budget.id})
+        response = self.client.delete(endpoint, data={"users": [user.id for user in users_to_delete]})
+
+        assert response.status_code == status.HTTP_200_OK
+        assert budget.shared_to.count() == 0

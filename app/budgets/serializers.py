@@ -33,6 +33,12 @@ class BudgetSerializer(serializers.ModelSerializer):
 class BudgetShareSerializer(serializers.Serializer):
     users = PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
 
+    def validate_users(self, values):
+        budget = self.context.get("budget")
+        if budget and budget.owner in values:
+            raise serializers.ValidationError("Cannot pass owner user.")
+        return values
+
 
 class BudgetOperationSerializer(serializers.ModelSerializer):
     class Meta:

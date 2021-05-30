@@ -6,8 +6,8 @@ from budgets.views import BudgetCategoryView, BudgetViewSet
 app_name = "budgets"
 
 router = DefaultRouter()
-router.register(r"", BudgetViewSet, basename="budgets")
+router.register(r"budgets", BudgetViewSet, basename="budgets")
 
 urlpatterns = [
-    path(r"categories", BudgetCategoryView.as_view(), name="categories"),
+    path(r"budgets/categories", BudgetCategoryView.as_view(), name="categories"),
 ] + router.urls

@@ -22,11 +22,10 @@ class UserViewSet(SerializerPerActionMixin, viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["create"]:
             return [permissions.AllowAny()]
-        elif self.action in ["list", "destroy"]:
+        elif self.action in ["list", "retrieve", "destroy"]:
             return [permissions.IsAdminUser()]
         elif self.action == "me":
             return [permissions.IsAuthenticated()]
-        return super().get_permissions()
 
     @action(detail=False, methods=["get"])
     def me(self, request):
